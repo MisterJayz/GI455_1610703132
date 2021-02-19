@@ -20,14 +20,15 @@ namespace ProgramChat
         public GameObject chat;
         public GameObject chatPanal;
         public GameObject textObject;
+        public Text sendMessage;
+        public Text receiveMessage;
         public GameObject inputFieldMessage;
         public Button clickButton;
         public GameObject displayText;        
 
-        string chatText;
-        //public Text showText;               
+        private string chatText;                       
 
-        public int maxMessage = 20;
+        public int maxMessage = 10;
         [SerializeField]
         List<Message> messageList = new List<Message>();
 
@@ -40,18 +41,13 @@ namespace ProgramChat
 
             websocket = new WebSocket("ws://127.0.0.1:25500/");
 
-            websocket.OnMessage += OnMessage;            
-
-            //websocket.Connect();            
+            websocket.OnMessage += OnMessage;
         }
 
         // Update is called once per frame
         void Update()
         {
-            //if (Input.GetKeyDown(KeyCode.Space))
-            //{                
-            //    websocket.Send("Number : " + Random.Range(0, 99999));
-            //}
+            
         }
 
         public void OnDestroy()
@@ -64,14 +60,24 @@ namespace ProgramChat
 
         public void OnMessage(object sender, MessageEventArgs messageEventArgs)
         {            
-            Debug.Log("Message from server : " + messageEventArgs.Data);            
+            Debug.Log("Message from server : " + messageEventArgs.Data);
+            if (chatText != messageEventArgs.Data)
+            {
+                //ได้ข้อความจากคนอื่น               
+                receiveMessage.text += messageEventArgs.Data;
+            }
+            else
+            {
+                //ข้อความของตัวเอง                      
+                sendMessage.text += messageEventArgs.Data;
+            }
         }
 
         public void GetInputOnClickButton()
         {
             playerName = inputFieldName.GetComponent<Text>().text;
             Debug.Log("Wellcome " + playerName + " to chat");
-            displayText.GetComponent<Text>().text = "Wellcome " + playerName + " to chat";            
+            displayText.GetComponent<Text>().text = "Wellcome " + playerName + " to chat";
             websocket.Connect();
             if (name.text == playerName && ip.text == "127.0.0.1" && port.text == "25500")
             {
@@ -83,14 +89,14 @@ namespace ProgramChat
         public void ClickButtonToSend()
         {           
             chatText = inputFieldMessage.GetComponent<Text>().text;
-            //showText.GetComponent<Text>().text = chatText;
+            //sendMessage.GetComponent<Text>().text = chatText;  
             SendMessageToChat(chatText);
             websocket.Send(chatText);            
         }
 
         public void SendMessageToChat(string text)
         {
-            if(messageList.Count >= maxMessage)
+            if (messageList.Count >= maxMessage)
             {
                 Destroy(messageList[0].textObject.gameObject);
                 messageList.Remove(messageList[0]);
@@ -99,13 +105,8 @@ namespace ProgramChat
             newMessage.chatText = text;
             GameObject newText = Instantiate(textObject, chatPanal.transform);
             newMessage.textObject = newText.GetComponent<Text>();
-            newMessage.textObject.text = newMessage.chatText;            
+            newMessage.textObject.text = newMessage.chatText;
             messageList.Add(newMessage);
-        }
-
-        public void ServerSendBack()
-        {
-
         }
     }    
 }
