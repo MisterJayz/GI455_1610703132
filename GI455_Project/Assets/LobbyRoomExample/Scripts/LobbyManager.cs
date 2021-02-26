@@ -118,5 +118,33 @@ namespace LobbyRoomExample
 
             return null;
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public class EventAddMoney
+        {
+            public string eventName;
+            public int data;
+        }
+
+        public delegate void DelegateHandleAddMoney(MessageCallback result);
+
+        public event DelegateHandleAddMoney OnAddMoney;
     }
 }
